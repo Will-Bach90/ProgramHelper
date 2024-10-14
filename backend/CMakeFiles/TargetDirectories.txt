@@ -1,0 +1,3 @@
+/Users/williambach/Desktop/ProgramHelper/ProgramHelper/backend/CMakeFiles/ProgramHelper.dir
+/Users/williambach/Desktop/ProgramHelper/ProgramHelper/backend/CMakeFiles/edit_cache.dir
+/Users/williambach/Desktop/ProgramHelper/ProgramHelper/backend/CMakeFiles/rebuild_cache.dir
