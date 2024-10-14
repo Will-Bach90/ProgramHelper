@@ -322,7 +322,7 @@ void server(tcp::acceptor& acceptor, net::io_context& ioc) {
 
 int main() {
     // Load environment variables from .env file
-    load_env_file("/Users/williambach/Desktop/ProgramHelper/ProgramHelper/.env");
+    load_env_file("../.env");
 
     try {
         net::io_context ioc;
