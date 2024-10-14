@@ -1,15 +1,18 @@
 import React from 'react';
+import { Card } from 'react-bootstrap';
 
 function ProblemDetail({ problem }) {
   return (
-    <div className="problem-detail">
-      <h2>{problem.title}</h2>
-      <p>{problem.description}</p>
-      <h4>Input:</h4>
-      <p>{problem.input}</p>
-      <h4>Output:</h4>
-      <p>{problem.output}</p>
-    </div>
+    <Card className="mb-4">
+      <Card.Body>
+        <Card.Title>{problem.title}</Card.Title>
+        <Card.Text>{problem.description}</Card.Text>
+        <h5>Input:</h5>
+        <Card.Text>{problem.input}</Card.Text>
+        <h5>Output:</h5>
+        <Card.Text>{problem.output}</Card.Text>
+      </Card.Body>
+    </Card>
   );
 }
 

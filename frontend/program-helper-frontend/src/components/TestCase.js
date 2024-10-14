@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Button, Form } from 'react-bootstrap';
 
 function TestCase({ onSubmit }) {
   const [testCaseInput, setTestCaseInput] = useState('');
@@ -11,19 +12,31 @@ function TestCase({ onSubmit }) {
 
   return (
     <div className="test-case">
-      <h3>Enter Test Case</h3>
-      <textarea
-        value={testCaseInput}
-        onChange={(e) => setTestCaseInput(e.target.value)}
-        placeholder="Enter test case input"
-      />
-      <button onClick={handleSubmit}>Submit</button>
+      <Form>
+        <Form.Group>
+          <Form.Label>Enter Test Case</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={3}
+            value={testCaseInput}
+            onChange={(e) => setTestCaseInput(e.target.value)}
+            placeholder="Enter test case input"
+          />
+        </Form.Group>
+        <Button variant="primary" onClick={handleSubmit} className="mt-3">
+          Submit
+        </Button>
+      </Form>
 
       {testCaseOutput && (
         <div className="test-case-output">
-          <h4>Output:</h4>
-          <p>{testCaseOutput}</p>
-        </div>
+        <h4>Output:</h4>
+        <p>
+          {typeof testCaseOutput === 'string'
+            ? testCaseOutput
+            : JSON.stringify(testCaseOutput)} {/* Ensure object is converted to string */}
+        </p>
+      </div>
       )}
     </div>
   );

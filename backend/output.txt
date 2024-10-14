@@ -1,0 +1,3 @@
+Input file: input.json
+Input data: [1, 1, 1, 1, 1, 1, 1, 1]
+Result: 4

@@ -1,16 +1,22 @@
 import React from 'react';
+import { ListGroup } from 'react-bootstrap';
 
 function ProblemList({ problems, onSelect }) {
   return (
     <div className="problem-list">
-      <h2>Select a Problem</h2>
-      <ul>
+      <h2 className="text-center mb-4">Select a Problem</h2>
+      <ListGroup>
         {problems.map((problem, index) => (
-          <li key={index} onClick={() => onSelect(problem)}>
+          <ListGroup.Item
+            key={index}
+            action
+            onClick={() => onSelect(problem)}
+            className="text-center"
+          >
             {problem.title}
-          </li>
+          </ListGroup.Item>
         ))}
-      </ul>
+      </ListGroup>
     </div>
   );
 }

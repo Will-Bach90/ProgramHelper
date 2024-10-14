@@ -92,6 +92,8 @@ ProgramHelper_EXTERNAL_OBJECTS =
 
 ProgramHelper: CMakeFiles/ProgramHelper.dir/main.cpp.o
 ProgramHelper: CMakeFiles/ProgramHelper.dir/build.make
+ProgramHelper: /opt/homebrew/lib/libboost_system-mt.dylib
+ProgramHelper: /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk/usr/lib/libcurl.tbd
 ProgramHelper: CMakeFiles/ProgramHelper.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/williambach/Desktop/ProgramHelper/ProgramHelper/backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable ProgramHelper"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/ProgramHelper.dir/link.txt --verbose=$(VERBOSE)
