@@ -15,8 +15,8 @@
 #include <sstream>
 #include <cstdio>   // For running shell commands
 #include <vector>
-
 #include <nlohmann/json.hpp>
+
 using json = nlohmann::json;
 
 namespace beast = boost::beast;  // from <boost/beast.hpp>
@@ -147,77 +147,139 @@ std::string escape_json_string(const std::vector<int>& test_case) {
     return json(test_case).dump();  // Serialize test case to JSON string
 }
 
-std::string run_user_code(const std::string& code, const std::vector<std::vector<int>>& test_cases) {
-    // Debugging: Print the received code
-    std::cout << "User's code received (raw):\n" << code << std::endl;
+std::string run_user_code(const std::string& code, const std::string& language, const std::vector<std::vector<int>>& test_cases) {
+    // Save user code to appropriate file based on language
+    std::string filename;
+    std::string compile_command, run_command;
 
-    // Write the user's code to a file (example: user_code.py)
-    std::ofstream code_file("user_code.py");
-    if (!code_file) {
-        return "Error: Unable to create user_code.py file";
+    if (language == "python") {
+        filename = "user_code.py";
+        run_command = "python3 " + filename + " input.json > output.txt";
+    } else if (language == "cpp") {
+        filename = "user_code.cpp";
+        compile_command = "g++ -o user_code_exec " + filename;
+        run_command = "./user_code_exec input.json > output.txt";
+    } else if (language == "java") {
+        filename = "UserCode.java";
+        compile_command = "javac " + filename;
+        run_command = "java UserCode input.json > output.txt";
+    } else {
+        return "Unsupported language";
     }
+
+    // Write code to file
+    std::ofstream code_file(filename);
     code_file << code;
     code_file.close();
 
-    std::string results;
-
-    // Loop through each test case
-    for (int i = 0; i < test_cases.size(); ++i) {
-        // Serialize the test case array into a JSON string and write it to a file
-        std::string input = json(test_cases[i]).dump();  // Serialize array to JSON
-        
-        std::ofstream input_file("input.json");
-        if (!input_file) {
-            return "Error: Unable to create input.json file";
+    // Compile if necessary
+    if (!compile_command.empty()) {
+        int compile_result = std::system(compile_command.c_str());
+        if (compile_result != 0) {
+            return "Compilation failed";
         }
+    }
+
+    // Execute with test cases
+    std::string results;
+    for (int i = 0; i < test_cases.size(); ++i) {
+        std::string input = nlohmann::json(test_cases[i]).dump();
+        std::ofstream input_file("input.json");
         input_file << input;
         input_file.close();
 
-        // Debugging: Print that the input file was created
-        std::cout << "Test case " << i + 1 << " input written to input.json: " << input << std::endl;
-
-        // Run the Python script, passing the file name (input.json)
-        std::string command = "python3 user_code.py input.json > output.txt";
-        std::cout << "Running command: " << command << std::endl;
-        int system_return = std::system(command.c_str());
-
-        if (system_return != 0) {
-            results += "Error: Failed to execute user code for test case " + std::to_string(i + 1) + "\n";
+        int exec_result = std::system(run_command.c_str());
+        if (exec_result != 0) {
+            results += "Test case " + std::to_string(i + 1) + ": Execution failed\n";
             continue;
         }
 
-        // Read the output from the file and capture the last line (which contains the actual result)
+        // Read the output
         std::ifstream output_file("output.txt");
-        if (!output_file) {
-            results += "Error: Unable to read output.txt for test case " + std::to_string(i + 1) + "\n";
-            continue;
-        }
-
-        std::string line;
-        std::string last_output;
-        while (std::getline(output_file, line)) {
-            last_output = line;  // Store the last line of the output
-        }
+        std::string output;
+        std::getline(output_file, output);
+        std::getline(output_file, output);
+        std::getline(output_file, output);
         output_file.close();
 
-        // Collecting results for each test case
-        results += "Test case " + std::to_string(i + 1) + ": " + last_output + "\n";
+        results += "Test case " + std::to_string(i + 1) + ": " + output + "\n";
     }
 
-    json response;
-    response["evaluation"] = results;  // Results are a plain string
-
-    // Debugging: Print the response before serialization
-    std::cout << "Backend JSON object (before serialization): " << response.dump(4) << std::endl;
-
-    // Return the serialized JSON object as a string
-    std::string final_response = response.dump();  // Serialize the response
-
-    // Debugging: Print the actual string being returned
-    std::cout << "Final response string (before return): " << final_response << std::endl;
-
-    return final_response; 
+    return results;
 }
+
+
+// std::string run_user_code(const std::string& code, const std::vector<std::vector<int>>& test_cases) {
+//     // Debugging: Print the received code
+//     std::cout << "User's code received (raw):\n" << code << std::endl;
+
+//     // Write the user's code to a file (example: user_code.py)
+//     std::ofstream code_file("user_code.py");
+//     if (!code_file) {
+//         return "Error: Unable to create user_code.py file";
+//     }
+//     code_file << code;
+//     code_file.close();
+
+//     std::string results;
+
+//     // Loop through each test case
+//     for (int i = 0; i < test_cases.size(); ++i) {
+//         // Serialize the test case array into a JSON string and write it to a file
+//         std::string input = json(test_cases[i]).dump();  // Serialize array to JSON
+        
+//         std::ofstream input_file("input.json");
+//         if (!input_file) {
+//             return "Error: Unable to create input.json file";
+//         }
+//         input_file << input;
+//         input_file.close();
+
+//         // Debugging: Print that the input file was created
+//         std::cout << "Test case " << i + 1 << " input written to input.json: " << input << std::endl;
+
+//         // Run the Python script, passing the file name (input.json)
+//         std::string command = "python3 user_code.py input.json > output.txt";
+//         std::cout << "Running command: " << command << std::endl;
+//         int system_return = std::system(command.c_str());
+
+//         if (system_return != 0) {
+//             results += "Error: Failed to execute user code for test case " + std::to_string(i + 1) + "\n";
+//             continue;
+//         }
+
+//         // Read the output from the file and capture the last line (which contains the actual result)
+//         std::ifstream output_file("output.txt");
+//         if (!output_file) {
+//             results += "Error: Unable to read output.txt for test case " + std::to_string(i + 1) + "\n";
+//             continue;
+//         }
+
+//         std::string line;
+//         std::string last_output;
+//         while (std::getline(output_file, line)) {
+//             last_output = line;  // Store the last line of the output
+//         }
+//         output_file.close();
+
+//         // Collecting results for each test case
+//         results += "Test case " + std::to_string(i + 1) + ": " + last_output + "\n";
+//     }
+
+//     json response;
+//     response["evaluation"] = results;  // Results are a plain string
+
+//     // Debugging: Print the response before serialization
+//     std::cout << "Backend JSON object (before serialization): " << response.dump(4) << std::endl;
+
+//     // Return the serialized JSON object as a string
+//     std::string final_response = response.dump();  // Serialize the response
+
+//     // Debugging: Print the actual string being returned
+//     std::cout << "Final response string (before return): " << final_response << std::endl;
+
+//     return final_response; 
+// }
 
 void handle_request(http::request<http::string_body> const& req, http::response<http::string_body>& res) {
     // Add CORS headers to allow cross-origin requests
@@ -232,7 +294,7 @@ void handle_request(http::request<http::string_body> const& req, http::response<
     }
 
     if (req.method() == http::verb::post && req.target() == "/api/solve") {
-        // Extract the prompt and user code from the request body
+        // Extract the prompt, user code, and language from the request body
         std::string request_body = req.body();
         json request_json;
         try {
@@ -245,32 +307,37 @@ void handle_request(http::request<http::string_body> const& req, http::response<
             return;
         }
 
-        if (!request_json.contains("prompt") || !request_json.contains("code")) {
-            std::cerr << "Error: 'prompt' or 'code' field missing in the request body" << std::endl;
+        // Validate required fields
+        if (!request_json.contains("prompt") || !request_json.contains("code") || !request_json.contains("language")) {
+            std::cerr << "Error: 'prompt', 'code', or 'language' field missing in the request body" << std::endl;
             res.result(http::status::bad_request);
-            res.body() = "{\"error\": \"Missing 'prompt' or 'code' field\"}";
+            res.body() = "{\"error\": \"Missing 'prompt', 'code', or 'language' field\"}";
             res.prepare_payload();
             return;
         }
 
         std::string prompt = request_json["prompt"];
         std::string user_code = request_json["code"];
+        std::string language = request_json["language"];  // New field for language selection
 
         // Generate test cases (example: for an array-based problem)
-        std::vector<int> test_case_1 = generate_random_array(10, 1, 100);  // Small array
-        std::vector<int> test_case_2 = generate_random_array(100, 1, 1000);  // Large array
-        std::vector<int> test_case_3 = {1, 1, 1, 1, 1, 1, 1, 1};  // Edge case (all elements the same)
+        std::vector<int> test_case_1 = generate_random_array(10, 1, 100);
+        std::vector<int> test_case_2 = generate_random_array(100, 1, 1000);
+        std::vector<int> test_case_3 = {1, 1, 1, 1, 1, 1, 1, 1};
         std::vector<std::vector<int>> test_cases = {test_case_1, test_case_2, test_case_3};
 
         // Run the user's code and evaluate it against the test cases
-        std::string results = run_user_code(user_code, test_cases);
+        std::string results = run_user_code(user_code, language, test_cases);
 
         // Return the evaluation results
         res.result(http::status::ok);
         res.set(http::field::server, "Boost.Beast");
         res.set(http::field::content_type, "application/json");
-        // res.body() = "{\"evaluation\": \"" + results + "\"}";
-        res.body() = results;
+
+        // Convert results to JSON format
+        json response_json;
+        response_json["evaluation"] = results;
+        res.body() = response_json.dump();
         res.prepare_payload();
     } else {
         res.result(http::status::not_found);
@@ -279,6 +346,67 @@ void handle_request(http::request<http::string_body> const& req, http::response<
         res.prepare_payload();
     }
 }
+
+// void handle_request(http::request<http::string_body> const& req, http::response<http::string_body>& res) {
+//     // Add CORS headers to allow cross-origin requests
+//     res.set(http::field::access_control_allow_origin, "*");
+//     res.set(http::field::access_control_allow_methods, "POST, GET, OPTIONS");
+//     res.set(http::field::access_control_allow_headers, "Content-Type");
+
+//     if (req.method() == http::verb::options) {
+//         res.result(http::status::no_content);
+//         res.prepare_payload();
+//         return;
+//     }
+
+//     if (req.method() == http::verb::post && req.target() == "/api/solve") {
+//         // Extract the prompt and user code from the request body
+//         std::string request_body = req.body();
+//         json request_json;
+//         try {
+//             request_json = json::parse(request_body);
+//         } catch (const json::parse_error& e) {
+//             std::cerr << "Error parsing JSON request body: " << e.what() << std::endl;
+//             res.result(http::status::bad_request);
+//             res.body() = "{\"error\": \"Invalid JSON format\"}";
+//             res.prepare_payload();
+//             return;
+//         }
+
+//         if (!request_json.contains("prompt") || !request_json.contains("code")) {
+//             std::cerr << "Error: 'prompt' or 'code' field missing in the request body" << std::endl;
+//             res.result(http::status::bad_request);
+//             res.body() = "{\"error\": \"Missing 'prompt' or 'code' field\"}";
+//             res.prepare_payload();
+//             return;
+//         }
+
+//         std::string prompt = request_json["prompt"];
+//         std::string user_code = request_json["code"];
+
+//         // Generate test cases (example: for an array-based problem)
+//         std::vector<int> test_case_1 = generate_random_array(10, 1, 100);  // Small array
+//         std::vector<int> test_case_2 = generate_random_array(100, 1, 1000);  // Large array
+//         std::vector<int> test_case_3 = {1, 1, 1, 1, 1, 1, 1, 1};  // Edge case (all elements the same)
+//         std::vector<std::vector<int>> test_cases = {test_case_1, test_case_2, test_case_3};
+
+//         // Run the user's code and evaluate it against the test cases
+//         std::string results = run_user_code(user_code, test_cases);
+
+//         // Return the evaluation results
+//         res.result(http::status::ok);
+//         res.set(http::field::server, "Boost.Beast");
+//         res.set(http::field::content_type, "application/json");
+//         // res.body() = "{\"evaluation\": \"" + results + "\"}";
+//         res.body() = results;
+//         res.prepare_payload();
+//     } else {
+//         res.result(http::status::not_found);
+//         res.set(http::field::content_type, "text/plain");
+//         res.body() = "Not Found";
+//         res.prepare_payload();
+//     }
+// }
 
 
 // Function to handle a single session

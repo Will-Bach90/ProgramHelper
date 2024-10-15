@@ -3,8 +3,6 @@ project(ProgramHelper)
 
 set(CMAKE_CXX_STANDARD 17)
 
-include(FetchContent)
-
 find_package(nlohmann_json CONFIG REQUIRED)
 
 find_package(Boost REQUIRED COMPONENTS system)

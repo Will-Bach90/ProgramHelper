@@ -361,6 +361,9 @@ ProgramHelper_IS_TOP_LEVEL:STATIC=ON
 //Value Computed by CMake
 ProgramHelper_SOURCE_DIR:STATIC=/Users/williambach/Desktop/ProgramHelper/ProgramHelper/backend
 
+//The directory containing a CMake configuration file for boost_beast.
+boost_beast_DIR:PATH=boost_beast_DIR-NOTFOUND
+
 //The directory containing a CMake configuration file for boost_headers.
 boost_headers_DIR:PATH=/opt/homebrew/lib/cmake/boost_headers-1.86.0
 
