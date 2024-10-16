@@ -204,7 +204,7 @@ std::string run_user_code(const std::string& code, const std::string& language, 
 
         results += "Test case " + std::to_string(i + 1) + ": " + output + "\n";
     }
-
+    std::remove(filename.c_str());
     return results;
 }
 
