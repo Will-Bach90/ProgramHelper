@@ -83,7 +83,6 @@ std::string call_openai_api(const std::string& prompt) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://api.openai.com/v1/chat/completions");
     curl_easy_setopt(curl, CURLOPT_POST, 1L);
 
-    // Add the OpenAI API key in the header
     std::string api_header = std::string("Authorization: Bearer ") + std::string(api_key);
     struct curl_slist* headers = nullptr;
     headers = curl_slist_append(headers, "Content-Type: application/json");
@@ -93,7 +92,6 @@ std::string call_openai_api(const std::string& prompt) {
     // Escape the prompt to ensure it is safe for JSON
     std::string escaped_prompt = escape_quotes(prompt);
 
-    // Construct the JSON request payload for chat completion
     std::string request_body = "{\"model\":\"gpt-4\", \"messages\":[{\"role\":\"user\", \"content\":\"" + escaped_prompt + "\"}], \"temperature\":0.7}";
     std::cout << "Sending JSON request body: " << request_body << std::endl;  // Debugging output
 
@@ -120,14 +118,12 @@ std::string call_openai_api(const std::string& prompt) {
         }
     }
 
-    // Clean up resources
     curl_slist_free_all(headers);
     curl_easy_cleanup(curl);
 
     return response_string;
 }
 
-// Helper function to generate random arrays
 std::vector<int> generate_random_array(int size, int min_value, int max_value) {
     std::vector<int> arr(size);
     for (int& x : arr) {
@@ -136,19 +132,16 @@ std::vector<int> generate_random_array(int size, int min_value, int max_value) {
     return arr;
 }
 
-// Convert array to JSON format
 std::string array_to_json(const std::vector<int>& array) {
     json json_array = array;
     return json_array.dump();
 }
 
-// Convert test case array to a properly escaped JSON string
 std::string escape_json_string(const std::vector<int>& test_case) {
-    return json(test_case).dump();  // Serialize test case to JSON string
+    return json(test_case).dump();  
 }
 
 std::string run_user_code(const std::string& code, const std::string& language, const std::vector<std::vector<int>>& test_cases) {
-    // Save user code to appropriate file based on language
     std::string filename;
     std::string compile_command, run_command;
 
